@@ -1,0 +1,108 @@
+You are working on the Wireless Scrcpy project.
+
+Project purpose
+---------------
+Wireless Scrcpy is a Windows desktop application built with .NET 8 WinForms.
+
+Its purpose is to provide a clean graphical interface for the entire wireless scrcpy workflow, including:
+
+- Detect ADB
+- Detect scrcpy
+- Detect connected Android devices
+- Enable TCP/IP mode
+- Discover the phone's IP address
+- Connect over Wi-Fi
+- Launch scrcpy
+- Disconnect and reconnect
+- Display workflow status
+- Run primarily from the Windows system tray
+
+The application uses an ApplicationContext-based architecture instead of a traditional Program.Run(new Form()) design.
+
+Current status
+--------------
+The project builds successfully.
+
+Environment:
+- Windows 10
+- .NET SDK 8.0.423
+- Build succeeds
+- 0 warnings
+- 0 errors
+
+Observed problem
+----------------
+Immediately after launch:
+
+1. The application starts successfully.
+2. The main status window flashes on screen for less than a second.
+3. The window immediately disappears.
+4. The application continues running.
+5. The tray icon is visible.
+6. Right-clicking the tray icon opens the context menu correctly.
+7. Clicking "Open Wireless Scrcpy" does nothing.
+8. Double-clicking the tray icon also does nothing.
+9. The application never crashes.
+10. The process remains running normally.
+
+Important observations
+----------------------
+- The tray icon works.
+- The context menu works.
+- The application responds normally otherwise.
+- The issue is specifically that the status window cannot be restored after startup.
+- A previous attempt modified WirelessScrcpyApplicationContext.cs and StatusForm.cs, but the behaviour did not change.
+
+Your task
+---------
+Perform a proper root-cause investigation.
+
+Do not assume the bug is in any particular file.
+
+Trace the complete lifecycle of the status window from application startup until it disappears.
+
+Determine:
+
+- what creates the window
+- what shows it
+- what hides it
+- every event that fires during startup
+- every event involved when "Open Wireless Scrcpy" is clicked
+- every event involved when the tray icon is double-clicked
+- whether the form is hidden, minimized, disposed, recreated, or blocked
+- whether any event handlers are firing unexpectedly
+- whether any code path immediately reverses a Show() operation
+- whether cross-thread UI marshaling is preventing restoration
+- whether startup timing or event ordering is responsible
+- whether the ApplicationContext lifecycle contributes to the issue
+
+Instrument the code with temporary logging if necessary to identify the exact sequence of events.
+
+After identifying the actual root cause:
+
+- implement the correct fix
+- preserve the existing architecture
+- avoid unnecessary refactoring
+- modify only the files that genuinely require changes
+- remove any temporary diagnostic logging before finishing
+
+Validation
+----------
+Verify all of the following:
+
+✓ The application starts correctly.
+✓ The status window remains visible on startup (when configured to do so).
+✓ Minimizing the window hides it to the system tray.
+✓ Double-clicking the tray icon restores the existing window.
+✓ Clicking "Open Wireless Scrcpy" restores the existing window.
+✓ Only one status window instance ever exists.
+✓ The application exits cleanly.
+✓ The solution builds successfully with zero errors.
+
+Deliverables
+------------
+1. Explain the root cause.
+2. Describe the event sequence that caused the problem.
+3. List every modified file.
+4. Explain why each change was required.
+5. Confirm that all validation scenarios passed.
