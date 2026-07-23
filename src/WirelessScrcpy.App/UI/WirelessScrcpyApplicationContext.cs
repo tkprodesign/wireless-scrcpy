@@ -55,7 +55,7 @@ public sealed class WirelessScrcpyApplicationContext : ApplicationContext
         await _lifetime.StartAsync(cancellationToken).ConfigureAwait(false);
         if (_settingsManager.Current.ShowStatusWindowOnStart)
         {
-            ShowStatus();
+            _dispatcher.Post(ShowStatus);
         }
     }
 
