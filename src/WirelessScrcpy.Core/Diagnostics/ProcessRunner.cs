@@ -11,9 +11,29 @@ public sealed class ProcessRunner : IProcessRunner
         using var process = CreateProcess(request);
         var output = new StringBuilder();
         var error = new StringBuilder();
+        object outputGate = new();
+        object errorGate = new();
         var stopwatch = Stopwatch.StartNew();
-        process.OutputDataReceived += (_, e) => { if (e.Data is not null) output.AppendLine(e.Data); };
-        process.ErrorDataReceived += (_, e) => { if (e.Data is not null) error.AppendLine(e.Data); };
+        process.OutputDataReceived += (_, e) =>
+        {
+            if (e.Data is not null)
+            {
+                lock (outputGate)
+                {
+                    output.AppendLine(e.Data);
+                }
+            }
+        };
+        process.ErrorDataReceived += (_, e) =>
+        {
+            if (e.Data is not null)
+            {
+                lock (errorGate)
+                {
+                    error.AppendLine(e.Data);
+                }
+            }
+        };
         process.Start();
         if (request.CaptureOutput)
         {
@@ -27,12 +47,20 @@ public sealed class ProcessRunner : IProcessRunner
         try
         {
             await process.WaitForExitAsync(linked.Token).ConfigureAwait(false);
+            if (request.CaptureOutput)
+            {
+                process.WaitForExit();
+            }
         }
         catch (OperationCanceledException) when (timeoutCts?.IsCancellationRequested == true && !cancellationToken.IsCancellationRequested)
         {
             timedOut = true;
             Kill(process);
             await process.WaitForExitAsync(CancellationToken.None).ConfigureAwait(false);
+            if (request.CaptureOutput)
+            {
+                process.WaitForExit();
+            }
         }
         catch (OperationCanceledException)
         {
@@ -41,7 +69,17 @@ public sealed class ProcessRunner : IProcessRunner
         }
 
         stopwatch.Stop();
-        return new ProcessRunResult(process.ExitCode, output.ToString(), error.ToString(), timedOut, stopwatch.Elapsed);
+        string standardOutput;
+        string standardError;
+        lock (outputGate)
+        {
+            standardOutput = output.ToString();
+        }
+        lock (errorGate)
+        {
+            standardError = error.ToString();
+        }
+        return new ProcessRunResult(process.ExitCode, standardOutput, standardError, timedOut, stopwatch.Elapsed);
     }
 
     public ProcessHandle Start(ProcessStartRequest request)

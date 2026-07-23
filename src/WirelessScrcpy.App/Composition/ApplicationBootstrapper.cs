@@ -49,7 +49,6 @@ public sealed class ApplicationBootstrapper
         services.AddSingleton<NetworkManager>();
         services.AddSingleton<ScrcpyCommandBuilder>();
         services.AddSingleton<ScrcpyLauncher>();
-        services.AddSingleton<ScrcpyProcessMonitor>();
         services.AddSingleton<ScrcpyManager>();
         services.AddSingleton<WorkflowStateMachine>();
         services.AddSingleton<ReconnectSupervisor>();
@@ -60,10 +59,7 @@ public sealed class ApplicationBootstrapper
         services.AddSingleton<StatusForm>();
         services.AddSingleton<TrayMenuFactory>();
         services.AddSingleton<IUsbDisconnectPrompt, UsbDisconnectPrompt>();
-        services.AddSingleton<WinFormsDialogService>();
-        services.AddSingleton<WindowsToastNotifier>();
-        services.AddSingleton<TrayBalloonNotifier>();
-        services.AddSingleton<IUserNotifier, CompositeUserNotifier>();
+        services.AddSingleton<IUserNotifier, TrayBalloonNotifier>();
         services.AddSingleton<NotificationManager>();
         services.AddSingleton<ApplicationLifetime>();
         services.AddSingleton<WirelessScrcpyApplicationContext>();

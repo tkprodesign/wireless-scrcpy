@@ -1,0 +1,41 @@
+# Build output
+bin/
+obj/
+out/
+publish/
+artifacts/
+
+# .NET user and local files
+*.user
+*.rsuser
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Test and coverage output
+TestResults/
+coverage/
+*.coverage
+*.coveragexml
+coverage.cobertura.xml
+
+# IDEs and editors
+.vs/
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs and diagnostics
+*.log
+*.dmp
+*.tmp
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# NuGet
+*.nupkg
+packages/
+.nuget/packages/

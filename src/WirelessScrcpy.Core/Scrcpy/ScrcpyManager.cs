@@ -5,13 +5,8 @@ namespace WirelessScrcpy.Core.Scrcpy;
 public sealed class ScrcpyManager
 {
     private readonly ScrcpyLauncher _launcher;
-    private readonly ScrcpyProcessMonitor _monitor;
 
-    public ScrcpyManager(ScrcpyLauncher launcher, ScrcpyProcessMonitor monitor)
-    {
-        _launcher = launcher;
-        _monitor = monitor;
-    }
+    public ScrcpyManager(ScrcpyLauncher launcher) => _launcher = launcher;
 
     public void ConfigurePath(string scrcpyPath) => _launcher.ConfigurePath(scrcpyPath);
 
@@ -26,6 +21,4 @@ public sealed class ScrcpyManager
             return Result<ScrcpySession>.Failure(new AppError(ErrorCode.ScrcpyLaunchFailed, "scrcpy could not be launched.", exception.ToString(), Severity.Error));
         }
     }
-
-    public Task WaitForExitAsync(ScrcpySession session, CancellationToken cancellationToken = default) => _monitor.WaitForExitAsync(session, cancellationToken);
 }
