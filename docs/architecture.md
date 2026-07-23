@@ -47,7 +47,6 @@ wireless-scrcpy/
       Program.cs
       Composition/
       UI/
-      Resources/
       app.manifest
     WirelessScrcpy.Core/
       WirelessScrcpy.Core.csproj
@@ -61,20 +60,12 @@ wireless-scrcpy/
       Notifications/
       Diagnostics/
       Common/
-  tests/
-    WirelessScrcpy.Core.Tests/
-      WirelessScrcpy.Core.Tests.csproj
-      ADB/
-      Devices/
-      Workflow/
-      Settings/
 ```
 
 ### Project responsibilities
 
-- `WirelessScrcpy.App`: WinForms entry point, UI forms, tray icon integration, Windows notification adapter, application composition, and application lifetime wiring.
+- `WirelessScrcpy.App`: WinForms entry point, UI forms, tray icon integration, tray notification adapter, application composition, and application lifetime wiring.
 - `WirelessScrcpy.Core`: platform-neutral workflow orchestration, process abstractions, tool discovery, device parsing, settings contracts, logging contracts, and domain models.
-- `WirelessScrcpy.Core.Tests`: unit tests for deterministic parsing, state transitions, settings behavior, and workflow decisions.
 
 ## 4. Namespaces
 
@@ -114,18 +105,15 @@ wireless-scrcpy/
 | `StatusForm` | `WirelessScrcpy.App.UI` | Displays current workflow state, current detail message, and launch/shutdown controls. |
 | `StatusViewModel` | `WirelessScrcpy.App.UI` | Converts workflow state updates into simple bindable UI text, enabled states, and severity indicators. |
 | `TrayIconController` | `WirelessScrcpy.App.UI.Tray` | Owns `NotifyIcon`, context menu items, show/hide behavior, and tray disposal. |
-| `TrayMenuFactory` | `WirelessScrcpy.App.UI.Tray` | Builds the fixed tray menu for status display, launch action, and exit action. |
+| `TrayMenuFactory` | `WirelessScrcpy.App.UI.Tray` | Builds the fixed tray menu for opening the window, connecting, disconnecting, and exiting. |
 | `UsbDisconnectPrompt` | `WirelessScrcpy.App.UI` | Presents the blocking user prompt to disconnect USB at the correct workflow state. |
-| `WinFormsDialogService` | `WirelessScrcpy.App.UI` | Provides UI-thread-safe message dialogs for errors and prompts. |
 
 ### 5.3 Notifications
 
 | Class | Namespace | Responsibility |
 | --- | --- | --- |
 | `IUserNotifier` | `WirelessScrcpy.Core.Notifications` | Abstraction for user-facing notifications. |
-| `WindowsToastNotifier` | `WirelessScrcpy.App.UI.Notifications` | Sends Windows notifications when available through supported Windows APIs. |
-| `TrayBalloonNotifier` | `WirelessScrcpy.App.UI.Notifications` | Fallback notification implementation using `NotifyIcon` balloon tips. |
-| `CompositeUserNotifier` | `WirelessScrcpy.App.UI.Notifications` | Selects the best available notifier and falls back safely if toast delivery is unavailable. |
+| `TrayBalloonNotifier` | `WirelessScrcpy.App.UI.Notifications` | Notification implementation using Windows tray balloon tips. |
 | `NotificationMessage` | `WirelessScrcpy.Core.Notifications` | Immutable notification title, body, and severity model. |
 
 ### 5.4 Workflow orchestration
@@ -161,7 +149,6 @@ wireless-scrcpy/
 | --- | --- | --- |
 | `ScrcpyLauncher` | `WirelessScrcpy.Core.Scrcpy` | Starts scrcpy with the selected wireless target and the required `--no-audio` argument. |
 | `ScrcpyCommandBuilder` | `WirelessScrcpy.Core.Scrcpy` | Builds the exact scrcpy argument list for version 1.0. |
-| `ScrcpyProcessMonitor` | `WirelessScrcpy.Core.Scrcpy` | Observes the scrcpy process exit and reports normal exit or interruption. |
 | `ScrcpySession` | `WirelessScrcpy.Core.Scrcpy` | Owns the running scrcpy process and exposes asynchronous stop and disposal. |
 
 ### 5.7 Tool detection
@@ -211,7 +198,6 @@ wireless-scrcpy/
 | --- | --- | --- |
 | `ISessionLogger` | `WirelessScrcpy.Core.Logging` | Abstraction for writing structured session events. |
 | `FileSessionLogger` | `WirelessScrcpy.Core.Logging` | Writes append-only session logs under the user application data folder. |
-| `SessionLogEntry` | `WirelessScrcpy.Core.Logging` | Immutable timestamp, level, event name, and message. |
 | `LogFileLocator` | `WirelessScrcpy.Core.Logging` | Resolves the active session log file location. |
 | `LogRetentionPolicy` | `WirelessScrcpy.Core.Logging` | Applies conservative cleanup to old session logs at startup. |
 
@@ -345,7 +331,7 @@ The status window and tray menu call `WirelessScrcpyController.StartAsync`. The 
 
 ### Windows notifications
 
-`CompositeUserNotifier` sends notifications for important transitions: ready/running, reconnecting, reconnection failure, and unrecoverable errors.
+`TrayBalloonNotifier` sends notifications for important transitions: ready/running, reconnecting, reconnection failure, and unrecoverable errors.
 
 ### Persistent settings
 
