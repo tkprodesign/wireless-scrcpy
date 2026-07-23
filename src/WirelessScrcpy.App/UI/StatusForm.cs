@@ -40,15 +40,6 @@ public sealed class StatusForm : Form
         Render();
     }
 
-    protected override void OnResize(EventArgs e)
-    {
-        base.OnResize(e);
-        if (WindowState == FormWindowState.Minimized)
-        {
-            Hide();
-        }
-    }
-
     private void ConfigureWindow()
     {
         Text = "Wireless Scrcpy";

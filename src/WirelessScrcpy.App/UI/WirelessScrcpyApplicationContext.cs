@@ -38,7 +38,7 @@ public sealed class WirelessScrcpyApplicationContext : ApplicationContext
         _statusForm.ConnectRequested += (_, _) => StartWorkflow();
         _statusForm.DisconnectRequested += (_, _) => StopWorkflow();
         _statusForm.ExitRequested += (_, _) => ExitThread();
-        _statusForm.Resize += (_, _) => NotifyMinimizedToTray();
+        _statusForm.Resize += (_, _) => HideStatusToTrayOnMinimize();
         _statusForm.FormClosing += (_, e) =>
         {
             if (!_shutdownStarted)
@@ -68,9 +68,14 @@ public sealed class WirelessScrcpyApplicationContext : ApplicationContext
             return;
         }
 
-        _statusForm.Show();
-        _statusForm.WindowState = FormWindowState.Normal;
         _statusForm.ShowInTaskbar = true;
+        _statusForm.WindowState = FormWindowState.Normal;
+        if (!_statusForm.Visible)
+        {
+            _statusForm.Show();
+        }
+
+        _statusForm.BringToFront();
         _statusForm.Activate();
     }
 
@@ -99,9 +104,20 @@ public sealed class WirelessScrcpyApplicationContext : ApplicationContext
         _trayIconController.Update(snapshot.State, snapshot.DetailMessage);
     });
 
+    private void HideStatusToTrayOnMinimize()
+    {
+        if (_shutdownStarted || _statusForm.WindowState != FormWindowState.Minimized)
+        {
+            return;
+        }
+
+        _statusForm.Hide();
+        NotifyMinimizedToTray();
+    }
+
     private void NotifyMinimizedToTray()
     {
-        if (_minimizeNoticeShown || _shutdownStarted || _statusForm.WindowState != FormWindowState.Minimized && _statusForm.Visible)
+        if (_minimizeNoticeShown || _shutdownStarted)
         {
             return;
         }
